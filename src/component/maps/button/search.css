@@ -1,0 +1,89 @@
+.container{
+    width: 14%;
+    margin: 0 auto;
+    margin-bottom: 15px;
+  
+    height: 50px;
+    
+    
+  }
+  
+  .search-box{
+    width: 100%;
+    max-width: 500px;
+    height: 32px;
+    background: inherit;
+    display: flex;
+    flex-direction: row;
+    direction: rtl;
+    justify-content: center;
+    align-items: center;
+    border-radius: 4px;
+    padding: 10px 1px;
+    backdrop-filter: blur(4px) saturate(180%);
+    border: 1px solid rgba(71, 67, 67, 0.25)
+  }
+ .iconsButton{
+    /* padding: 5px; */
+    
+    /* font: inherit;
+    letter-spacing: inherit;
+    color: currentColor; */
+ }
+  
+  .search-box input{
+    background: transparent;
+    overflow-y: auto;
+    flex: 1;
+    border: 0;
+    outline: none;
+    padding: 0px;
+    font-size: medium;
+    color: inherit;
+  }
+  ::placeholder{
+    color: #c0becc;
+    font-size: medium;
+  
+  }
+  .search-box button img{
+    width: 22px;
+  }
+  .search-box button{
+    overflow-y: auto;
+    margin: 0;
+    border: 0;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    background: inherit;
+    cursor: pointer;
+   
+  }
+  .search-box button:active{
+    background: #edebf3;
+  }
+
+  @media only screen and (max-width: 1000px) {
+    .container{
+      width: 20%;
+  
+    }
+    .leaflet-container{
+      width: 200px
+    }
+
+  
+  }
+  
+  
+  @media only screen and (max-width: 400px) {
+    .leaflet-container{
+      width: 200px
+    }
+  
+  
+  }
+  
+  
+  
