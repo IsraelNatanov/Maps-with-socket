@@ -15,7 +15,7 @@ function App() {
     dispatch(fetchFature());
   });
   return (
-   <div>
+    <div className="containe">
 
     
     <MapContainer/>

@@ -26,6 +26,7 @@ function Map({ setMap }: MapProps) {
       }),
       layers: [
         new TileLayer({
+          preload:Infinity,
           source: new OSM(),
         }),
        
@@ -79,7 +80,7 @@ function Map({ setMap }: MapProps) {
   // return <div ref={mapContainerRef} style={{ height: "77vh", width: "100%" }}  />;
   return(
     <div>
-    <div ref={mapContainerRef} style={{ width: '100%', height: '87vh' }} />
+    <div ref={mapContainerRef} style={{ minWidth: '100vh', height: '87vh' }} />
     <div id="tooltip" className='tooltip hover' ref={tooltipRef} style={{ display: 'none' }} />
   </div>
   )

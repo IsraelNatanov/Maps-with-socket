@@ -25,6 +25,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { Geometry } from "ol/geom";
 import SimpleBackdrop from "./util/simpleBackdrop";
 import { io } from "socket.io-client";
+import DeviderEvent from "./button/deviderEvent";
 const format = new GeoJSON({ featureProjection: "EPSG:3857" });
 
 interface Options {
@@ -52,19 +53,9 @@ function MapContainer() {
   useEffect(() => {
     getApiEvents();
 
-    // getAllNameOfProperties()
+
   }, []);
 
-  // useEffect(() => {
-  //   if (isPolygon) {
-  //     setOpenLoading(true);
-  //     console.log(polygonSource);
-  //     handleAddLayerPolygon();
-  //     setIsAddPolygon(false);
-  //     handleAddLayerPolygon();
-  //     setOpenLoading(false);
-  //   }
-  // }, [isAddPolygon]);
   useEffect(() => {
     console.log("gsgs", options);
   }, [options]);
@@ -74,11 +65,11 @@ function MapContainer() {
       const res = await axios.get("http://localhost:5000/eventesFeatures");
       setEventesFeatures(res.data);
       console.log(res.data);
-      console.log(1212);
+   
     } catch (error) {
       throw error;
     }
-    // await getAllNameOfProperties()
+
   };
 
   const vectorLoaderPolygon = async () => {
@@ -309,15 +300,17 @@ function MapContainer() {
     );
   };
   return (
-    <div>
+    <div style={{position:'relative'}}>
       {openLoading && <SimpleBackdrop openLoading={openLoading} />}
       <Stack
         direction="row"
         justifyContent="space-between"
         alignItems="flex-start"
         spacing={2}
+       
       >
         <Stack spacing={2} direction="row">
+        <DeviderEvent map={map} setIsPoint={setIsPoint} isPoint={isPoint} handleAddLayerPoint={handleAddLayerPoint}/>
           <Button
             style={styleButton}
             variant="text"
@@ -413,11 +406,13 @@ function MapContainer() {
               <DeleteIcon />
             </Button>
           )}
+          
         </Stack>
 
         {(isPoint || isPolygon) && (
           <SearchGeomtry setMap={setMap} map={map} options={options} />
         )}
+
       </Stack>
       <Map setMap={setMap} map={map} />
     </div>

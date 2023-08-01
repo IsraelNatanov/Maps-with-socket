@@ -38,6 +38,9 @@
   border-top-color: var(--tooltip-color);
   transform-origin: top center;
 } */
+.containe{
+  width: 100%;
+}
 .buttonHeader{
   position: fixed;
   width: 100%;
@@ -94,6 +97,7 @@
 }
 .create-polygon{
   max-height:60px ;
+  max-width: 253px;
 
  
 }

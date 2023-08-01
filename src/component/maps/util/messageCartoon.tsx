@@ -14,8 +14,9 @@ export default function MessageCartoon({ closeButtonMessage}: IPropsMessage) {
     <Box
     sx={{
         position:"relative",
-        top: "525px",
-        left: "70px",
+        top: "620px",
+        
+        // left: "30px",
         zIndex:12,
         width: 312,
           height: 85,

@@ -14,7 +14,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid,
   TextField,
 } from "@mui/material";
 import Geometry, { Type } from "ol/geom/Geometry";
@@ -31,6 +30,7 @@ import { GeometryType, GeometryTypePolygon } from "../../../typs/featuresType";
 import { Coordinate, CoordinateFormat } from "ol/coordinate";
 import SnackbarPolygon from "./snackbarPolygon";
 import MessageCartoon from "../util/messageCartoon";
+import Grid from '@mui/material/Grid';
 // import "../maps.css"
 
 const theme = createTheme({
@@ -63,7 +63,7 @@ const CreatePolygon: React.FC<MapComponentProps> = ({ map, setMap,setIsAddPolygo
   const [open, setOpen] = useState<boolean>(false);
     const [openMessage, setOpenMessage] = useState<boolean>(false);
   const [openAlert, setOpenAlert] = useState<boolean>(false);
-
+  const [drawInteractionType, setDrawInteractionType] =  useState<Type |null>()
   const [name, setName] = useState('שם הגזרה');
   const [geometry, setGeometry] = useState<GeometryTypePolygon>();
   const [currentFeature, setCurrentFeature] = useState<any>(null);
@@ -109,9 +109,10 @@ const CreatePolygon: React.FC<MapComponentProps> = ({ map, setMap,setIsAddPolygo
   const handleStartDrawing = (e: string) => {
     if (e != 'None' && map && vectorSourceRef.current) {
       setOpenMessage(true)
+      setDrawInteractionType(e as Type)
       const drawInteraction = new Draw({
         source: vectorSourceRef.current,
-        type: e as Type,
+        type: drawInteractionType!,
       });
       drawInteraction.on("drawend", (event: any) => {
         const feature = event.feature;
@@ -149,6 +150,8 @@ const CreatePolygon: React.FC<MapComponentProps> = ({ map, setMap,setIsAddPolygo
 
   const handleSave = async () => {
     if (name && currentFeature) {
+      console.log(drawInteractionType);
+      
       const geometryFeature = currentFeature.getGeometry();
   
       // Get the coordinates of the polygon vertices
@@ -170,7 +173,7 @@ const CreatePolygon: React.FC<MapComponentProps> = ({ map, setMap,setIsAddPolygo
       const geoJsonString = JSON.stringify(geoJson);
       console.log(geoJsonString);
   
-      console.log(geoJson);
+      console.log(JSON.stringify({ name, geoJson }));
       setGeometry(geoJson!);
   
       const overlayElement = document.createElement('div');
@@ -248,7 +251,7 @@ const CreatePolygon: React.FC<MapComponentProps> = ({ map, setMap,setIsAddPolygo
     if (currentFeature) {
       // Remove the current feature from the vector source
       vectorSourceRef.current!.removeFeature(currentFeature);
-
+      setOpenMessage(false)
       // Remove the current feature's overlay from the map
       const deletedOverlay = polygons.find(polygon => polygon.feature === currentFeature)?.overlay;
       if (deletedOverlay) {
@@ -281,7 +284,8 @@ const CreatePolygon: React.FC<MapComponentProps> = ({ map, setMap,setIsAddPolygo
           <option value="None">None</option>
           {/* <option value="Point">Point</option>
           <option value="LineString">LineString</option> */}
-          <option value="Polygon">Polygon</option>
+          <option value="Polygon">גזרות</option>
+          <option value="Point">אירוע</option>
           {/* <option value="Circle">Circle</option> */}
         </select>
         <label className="inpu-text" htmlFor="type">
@@ -303,7 +307,7 @@ const CreatePolygon: React.FC<MapComponentProps> = ({ map, setMap,setIsAddPolygo
           justifyContent="space-between"
           alignItems="center"
         >
-          <DialogTitle id="alert-dialog-title">
+          <DialogTitle id="alert-dialog-title" >
             {"אנה הזן שם לאתר/פוליגון"}
           </DialogTitle>
         </Grid>
@@ -316,19 +320,22 @@ const CreatePolygon: React.FC<MapComponentProps> = ({ map, setMap,setIsAddPolygo
                   margin="normal"
                   fullWidth
                   label="שם האתר/הפוליגון"
-                  defaultValue={name}
-                  helperText="Some important text"
+                  // defaultValue={name}
+                  // helperText="Some important text"
                   onChange={handleChange}
                 />
               </div>
             </ThemeProvider>
           </CacheProvider>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
+        <DialogActions sx={{display:'flex',justifyContent:"space-between"}}>
+      
+
+          <Button onClick={handleClose}>בטל</Button>
           <Button onClick={handleSave} autoFocus>
             שמור
           </Button>
+         
         </DialogActions>
       </Dialog>
       {openMessage && <MessageCartoon  closeButtonMessage={closeButtonMessage}/>}

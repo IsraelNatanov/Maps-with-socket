@@ -1,3 +1,4 @@
+import { ReactNode } from "react"
 
 export interface Eventes {
     features: Features[]
@@ -11,10 +12,12 @@ export interface Eventes {
 
   
   export interface Features {
+    time: ReactNode,
     featureObject: FeatureObject[]
     type: string,
     id: number,
     label: string
+    date: string,
   }
 
  
