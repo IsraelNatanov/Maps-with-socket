@@ -20,7 +20,7 @@ export default function SnackbarPolygon({ setOpenAlert, openAlert }: OpenProps) 
   return (
     <Snackbar open={openAlert} >
         <Alert  severity="success" sx={{ width: '100%' }}>
-       !הפוליגון נוסף בהצלחה
+       ! נוסף בהצלחה
         </Alert>
       </Snackbar>
   );

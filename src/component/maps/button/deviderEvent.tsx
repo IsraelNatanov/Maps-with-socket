@@ -71,7 +71,7 @@ export default function DeviderEvent({map, setIsPoint, isPoint, handleAddLayerPo
         );
         setIsNewEvent(true)
         setEventesFeatures([...eventesFeatures, newPolygon])
-        setIsNewEvent(true)
+
         
         // Add the new polygon to the map
      

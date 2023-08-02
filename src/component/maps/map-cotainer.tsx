@@ -377,7 +377,7 @@ function MapContainer() {
             )}
           </Button> */}
 
-          <ButtonSelectEvent map={map} />
+          {/* <ButtonSelectEvent map={map} /> */}
           <Button style={styleButton} variant="text" onClick={displayGeomtry}>
             {isGeomtry && eventesFeatures.length > 0 ? (
               <>

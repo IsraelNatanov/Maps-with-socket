@@ -108,11 +108,12 @@ const CreatePolygon: React.FC<MapComponentProps> = ({ map, setMap,setIsAddPolygo
 
   const handleStartDrawing = (e: string) => {
     if (e != 'None' && map && vectorSourceRef.current) {
-      setOpenMessage(true)
       setDrawInteractionType(e as Type)
+      setOpenMessage(true)
+     
       const drawInteraction = new Draw({
         source: vectorSourceRef.current,
-        type: drawInteractionType!,
+        type: e as Type,
       });
       drawInteraction.on("drawend", (event: any) => {
         const feature = event.feature;
@@ -150,13 +151,18 @@ const CreatePolygon: React.FC<MapComponentProps> = ({ map, setMap,setIsAddPolygo
 
   const handleSave = async () => {
     if (name && currentFeature) {
-      console.log(drawInteractionType);
+     
+
+      
+      // console.log(drawInteractionType);
       
       const geometryFeature = currentFeature.getGeometry();
   
       // Get the coordinates of the polygon vertices
-      const coordinates = geometryFeature.getCoordinates()[0];
-  
+
+      if(drawInteractionType === 'Polygon'){
+
+        const coordinates = geometryFeature.getCoordinates()[0];
       // Convert the coordinates from lon/lat to numbers
       const convertedCoordinates = coordinates.map((coord: Coordinate) => {
         const [lon, lat] = transform(coord, 'EPSG:3857', 'EPSG:4326');
@@ -199,43 +205,63 @@ const CreatePolygon: React.FC<MapComponentProps> = ({ map, setMap,setIsAddPolygo
       };
   
       setPolygons([...polygons, polygonData]);
-      setOpen(false);
-      if (selectRef.current !== null) {
-        selectRef.current.value = 'None';
-
-      }
+    
+      await postApiCreateGeometry( name, geoJson, 'polygonFeatures')
+    }
+      else if(drawInteractionType === 'Point'){
+ 
+        const coordinates = geometryFeature.getCoordinates();
       
-      // Send the polygon data to the server
-      try {
-        const response = await fetch('http://localhost:5000/polygonFeatures', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ name, geoJson }),
-        });
-  
-        if (response.ok) {
-          console.log('Polygon data saved successfully');
-          setIsAddPolygon(true)
-          setOpenAlert(true)
-          setOpenMessage(false)
-          setTimeout(() => {
-            setOpenAlert(false)
-            
-          }, 6000);
-        } else {
-          console.error('Error saving polygon data');
-        }
-      } catch (error) {
-        console.error(error);
+
+     
+        const olTargetCoordinate = transform(coordinates, 'EPSG:3857', 'EPSG:4326');
+        
+    
+        const geoJson = {
+          type: 'Point',
+          coordinates: olTargetCoordinate,
+        };
+        
+        await postApiCreateGeometry( name, geoJson, 'events')
       }
+
+ 
+    }
+    setOpen(false);
+    if (selectRef.current !== null) {
+      selectRef.current.value = 'None';
 
     }
     handleClose()
   
   
   };
+  const postApiCreateGeometry = async(name :string, geoJson:any, partUrl:string )=>{
+    try {
+      const response = await fetch(`http://localhost:5000/${partUrl}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, geoJson }),
+      });
+
+      if (response.ok) {
+        console.log('data saved successfully');
+        // setIsAddPolygon(true)
+        setOpenAlert(true)
+        setOpenMessage(false)
+        setTimeout(() => {
+          setOpenAlert(false)
+          
+        }, 6000);
+      } else {
+        console.error('Error saving data');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   const handleDeletePolygon = (index: number) => {
     if (map && vectorSourceRef.current) {

@@ -5,7 +5,7 @@ import Paper from "@mui/material/Paper";
 import {
   Button,
 } from "@mui/material";
-import { Function } from 'lodash';
+
 type PlayEventFunction = (index?: number) => Promise<void>;
 type IPropsMessage = {
    
@@ -16,7 +16,7 @@ type IPropsMessage = {
 export default function NewEventMessage({setIsNewEvent, playEvent}:IPropsMessage) {
 
 
-    const centerStyles={
+    const ButtonCenterStyles={
   display: 'flex',
   justifyContent: 'center',
   margin:'0 auto'
@@ -28,7 +28,7 @@ export default function NewEventMessage({setIsNewEvent, playEvent}:IPropsMessage
         position:"absolute",
         top: 80,
     
-        left: '600px',
+        left: '50%',
         zIndex:12,
         width: 312,
           height: 85,
@@ -51,7 +51,7 @@ export default function NewEventMessage({setIsNewEvent, playEvent}:IPropsMessage
       <Button
             variant="text"
             size='medium'
-            style={centerStyles}
+            style={ButtonCenterStyles}
             onClick={()=>playEvent()}
             // sx={{display:'flex', justifyContent:'center'}}
             // onClick={handleAddLayerPoint}
