@@ -20,7 +20,6 @@ type MapProps = {
 };
 const SearchMap: React.FC<MapProps> = ({ map }) => {
  
-
   function searchByName(name: string) {
     const layers = map!.getLayers().getArray();
 
