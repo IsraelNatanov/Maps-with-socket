@@ -20,11 +20,12 @@ import Vector from "ol/layer/Vector";
 import Vectors from "ol/source/Vector";
 import GeoJSON from "ol/format/GeoJSON";
 import { Geometry } from "ol/geom";
-import { Feature, Map as OlMap } from 'ol';
+import { Feature, Map as OlMap, View } from 'ol';
 import { io } from "socket.io-client";
 import {Features} from "../../../typs/featuresType"
 import axios from "axios";
 import NewEventMessage from "../util/newEventMessage";
+import { fromLonLat, toLonLat } from "ol/proj";
 
 const theme = createTheme({
   direction: "rtl", // Both here and <body dir="rtl">
@@ -50,6 +51,7 @@ type MapProps = {
 export default function DeviderEvent({map, setIsPoint, isPoint, handleAddLayerPoint}:MapProps) {
   const [isBell, setIsBell] = useState<boolean>(false);
   const [isEvent, setIsEvent] = useState<boolean>(false);
+  const [dataNewEvent, setDataNewEvent] = useState<string>('')
   const [isNewEvent, setIsNewEvent] = useState<boolean>(false);
   const featureIndexRef = useRef<Vector<Vectors<Geometry>> | null>(null);
   const eventSourceRef = useRef <Vectors<Geometry> | null>(null);
@@ -71,7 +73,7 @@ export default function DeviderEvent({map, setIsPoint, isPoint, handleAddLayerPo
         );
         setIsNewEvent(true)
         setEventesFeatures([...eventesFeatures, newPolygon])
-
+        setDataNewEvent(newPolygon.name)
         
         // Add the new polygon to the map
      
@@ -171,6 +173,15 @@ export default function DeviderEvent({map, setIsPoint, isPoint, handleAddLayerPo
     setIsNewEvent(false)
     setIsEvent(true)
 
+    const point:any = eventesFeatures[index].features[0].geometry.coordinates;
+   
+    map!.setView(
+      new View({
+        projection: "EPSG:3857",
+        center: fromLonLat(point),
+        zoom: 10,
+      })
+    );
 
     if (index >= 0) {
       map!.addLayer(featureIndex);
@@ -182,7 +193,7 @@ export default function DeviderEvent({map, setIsPoint, isPoint, handleAddLayerPo
   // sx={{ height: "440px", direction: "ltr", width: "100%",minHeight:410 }}
   return (
     <div >
-{isNewEvent && <NewEventMessage setIsNewEvent={setIsNewEvent} playEvent={playEvent}/>}
+{isNewEvent && <NewEventMessage setIsNewEvent={setIsNewEvent} playEvent={playEvent} dataNewEvent={dataNewEvent}/>}
       <CacheProvider value={cacheRtl}>
         <ThemeProvider theme={theme}>
           <div dir="rtl">

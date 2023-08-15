@@ -13,7 +13,7 @@ export interface Eventes {
   
   export interface Features {
     time: ReactNode,
-    featureObject: FeatureObject[]
+    features: FeatureObject[]
     type: string,
     id: number,
     label: string

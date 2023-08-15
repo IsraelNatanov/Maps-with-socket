@@ -28,7 +28,7 @@ import { fromLonLat, transform } from "ol/proj";
 import GeoJSON from "ol/format/GeoJSON";
 import { GeometryType, GeometryTypePolygon } from "../../../typs/featuresType";
 import { Coordinate, CoordinateFormat } from "ol/coordinate";
-import SnackbarPolygon from "./snackbarPolygon";
+import SnackbarPolygon from "../util/snackbarPolygon";
 import MessageCartoon from "../util/messageCartoon";
 import Grid from '@mui/material/Grid';
 // import "../maps.css"
@@ -67,6 +67,7 @@ const CreatePolygon: React.FC<MapComponentProps> = ({ map, setMap,setIsAddPolygo
   const [name, setName] = useState('שם הגזרה');
   const [geometry, setGeometry] = useState<GeometryTypePolygon>();
   const [currentFeature, setCurrentFeature] = useState<any>(null);
+  const [messageCreateGeometry, setMessageCreateGeometry] = useState<string>('')
   const selectRef = useRef<HTMLSelectElement>(null);
 
   useEffect(() => {
@@ -106,29 +107,29 @@ const CreatePolygon: React.FC<MapComponentProps> = ({ map, setMap,setIsAddPolygo
   }, [map, setMap]);
 
 
-  const handleStartDrawing = (e: string) => {
+  const handleStartDrawing = async(e: string) => {
+
     if (e != 'None' && map && vectorSourceRef.current) {
       setDrawInteractionType(e as Type)
       setOpenMessage(true)
+      
      
       const drawInteraction = new Draw({
         source: vectorSourceRef.current,
         type: e as Type,
       });
-      drawInteraction.on("drawend", (event: any) => {
+
+      drawInteractionRef.current = drawInteraction;
+      drawInteractionRef.current.on("drawend", (event: any) => {
         const feature = event.feature;
         setCurrentFeature(feature);
 
         map!.removeInteraction(drawInteractionRef.current!);
 
-       
       });
-
-      drawInteractionRef.current = drawInteraction;
-
       map.addInteraction(drawInteraction);
     }
-    else if(e == 'None'){
+    else if(e === 'None'){
       map!.removeInteraction(drawInteractionRef.current!);
       setOpenMessage(false)
     }
@@ -140,6 +141,7 @@ const CreatePolygon: React.FC<MapComponentProps> = ({ map, setMap,setIsAddPolygo
   
   const closeButtonMessage =()=>{
     setOpenMessage(false)
+    vectorSourceRef.current!.removeFeature(currentFeature);
     if (selectRef.current !== null) {
         selectRef.current.value = 'None';
 
@@ -364,7 +366,7 @@ const CreatePolygon: React.FC<MapComponentProps> = ({ map, setMap,setIsAddPolygo
          
         </DialogActions>
       </Dialog>
-      {openMessage && <MessageCartoon  closeButtonMessage={closeButtonMessage}/>}
+      {openMessage && <MessageCartoon  closeButtonMessage={closeButtonMessage} drawInteractionType={drawInteractionType!}/>}
       {openAlert&& <SnackbarPolygon setOpenAlert={setOpenAlert} openAlert={openAlert}/>}
     </div>
   );
