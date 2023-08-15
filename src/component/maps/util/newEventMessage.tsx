@@ -11,9 +11,10 @@ type IPropsMessage = {
    
   setIsNewEvent :React.Dispatch<React.SetStateAction<boolean>>;
   playEvent: PlayEventFunction;
+  dataNewEvent: string
   }
 
-export default function NewEventMessage({setIsNewEvent, playEvent}:IPropsMessage) {
+export default function NewEventMessage({setIsNewEvent, playEvent, dataNewEvent}:IPropsMessage) {
 
 
     const ButtonCenterStyles={
@@ -45,7 +46,7 @@ export default function NewEventMessage({setIsNewEvent, playEvent}:IPropsMessage
           <div className="subject-text">הופעל אירוע</div>{" "}
        
         </div>
-        <div className="description">   אירוע בגזרת חובב </div>
+        <div className="description">אירוע בגזרת {dataNewEvent}</div>
         
       </div>
       <Button
