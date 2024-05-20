@@ -332,11 +332,11 @@ const CreatePolygon: React.FC<MapComponentProps> = ({ map, setMap,setIsAddPolygo
         <Grid
           container
           direction="row"
-          justifyContent="space-between"
+          justifyContent={'center'}
           alignItems="center"
         >
           <DialogTitle id="alert-dialog-title" >
-            {"אנה הזן שם לאתר/פוליגון"}
+            {"אנה הזן שם "}
           </DialogTitle>
         </Grid>
         <DialogContent>
@@ -347,7 +347,7 @@ const CreatePolygon: React.FC<MapComponentProps> = ({ map, setMap,setIsAddPolygo
                   id="name"
                   margin="normal"
                   fullWidth
-                  label="שם האתר/הפוליגון"
+                  label="שם "
                   // defaultValue={name}
                   // helperText="Some important text"
                   onChange={handleChange}

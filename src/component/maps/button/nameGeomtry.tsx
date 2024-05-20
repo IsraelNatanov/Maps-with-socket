@@ -53,12 +53,12 @@ export default function NameGeomtry({ setOpen , open, setName}: OpenProps)  {
       <Grid
   container
   direction="row"
-  justifyContent="space-between"
+  justifyContent={'center'}
   alignItems="center"
 >
        <Button onClick={handleClose}><CloseIcon /></Button>
-      <DialogTitle id="alert-dialog-title">
-        {"אנה הזן שם לאתר/פוליגון"}
+      <DialogTitle id="alert-dialog-title" >
+        {"אנה הזן שם "}
       </DialogTitle>
  
       </Grid>
@@ -70,7 +70,7 @@ export default function NameGeomtry({ setOpen , open, setName}: OpenProps)  {
       <TextField
           id="name"
           margin='normal'
-          fullWidth label="שם האתר/הפוליגון"
+          fullWidth label="שם "
           defaultValue={"פוליגון מס 1"}
           helperText="Some important text"
           onChange={(e)=>setName(e.target.value)}

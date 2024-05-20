@@ -193,14 +193,14 @@ let i = 0;
           <Grid
             container
             direction="row"
-            justifyContent="space-between"
+           justifyContent={'center'}
             alignItems="center"
           >
             <Button onClick={handleClose}>
               <CloseIcon />
             </Button>
-            <DialogTitle id="alert-dialog-title">
-              {"אנה הזן שם לאתר/פוליגון"}
+            <DialogTitle id="alert-dialog-title" >
+              {"אנה הזן שם "}
             </DialogTitle>
           </Grid>
           <DialogContent>
@@ -211,7 +211,7 @@ let i = 0;
                     id="name"
                     margin="normal"
                     fullWidth
-                    label="שם האתר/הפוליגון"
+                    label="שם"
                     defaultValue={"פוליגון מס 1"}
                     helperText="Some important text"
                   />
