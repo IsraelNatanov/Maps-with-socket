@@ -9,7 +9,7 @@ import { prefixer } from "stylis";
 import Button from "@mui/material/Button";
 import { useAppSelector } from "../../../store/hooks";
 import { Features } from "../../../typs/featuresType";
-import { styleButton, styleFunction } from "../../style/styleFunction";
+import { styleButton, styleFunction } from "../../../style/styleFunction";
 import Vector from "ol/layer/Vector";
 import Vectors from "ol/source/Vector";
 import GeoJSON from "ol/format/GeoJSON";

@@ -1,25 +1,28 @@
 import {  useEffect } from 'react'
 
 import './App.css'
-import MapContainer from './component/maps/map-cotainer'
+import { QueryClientProvider, QueryClient } from 'react-query'
+
 import { fetchFature } from "./store/features/eventFeaturesSlice";
 import { useAppDispatch } from "./store/hooks";
+import MapContainer from './component/map-cotainer';
 
 
 
 function App() {
 
-
+  const queryClient = new QueryClient()
+ 
   const dispatch = useAppDispatch();
   useEffect(() => {
     dispatch(fetchFature());
   });
   return (
-    <div className="containe">
+ 
 
-    
+<QueryClientProvider client={queryClient}>
     <MapContainer/>
-   </div>
+    </QueryClientProvider>
       
   )
 }

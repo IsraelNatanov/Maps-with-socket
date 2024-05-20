@@ -1,3 +1,5 @@
+import { Feature } from "ol"
+import { Polygon } from "ol/geom"
 import { ReactNode } from "react"
 
 export interface Eventes {
@@ -9,6 +11,7 @@ export interface Eventes {
     geometry: GeometryType
     properties: Properties
   }
+  
 
   
   export interface Features {
@@ -37,3 +40,11 @@ export interface Eventes {
     coordinates:  [[number],[number]][];
     type: string
   }
+  export interface SelectedPolygonType {
+    geometry: Feature<Polygon>[];
+    indexLayer: number;
+    indexFeature: number;
+    nameLayer: string;
+    nameFeature:string
+    
+  };

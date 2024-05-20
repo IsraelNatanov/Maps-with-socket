@@ -4,9 +4,9 @@ import Fill from "ol/style/Fill";
 import Icon from "ol/style/Icon";
 import Stroke from "ol/style/Stroke";
 import Style from "ol/style/Style";
-import styleR from '../../images/icons8-map-64.png'
-import styleU from '../../images/381599_error_icon.svg'
-import styleL from '../../images/right-arrow.png'
+import styleR from '../images/icons8-map-64.png'
+import styleU from '../images/381599_error_icon.svg'
+import styleL from '../images/right-arrow.png'
 import CSS from "csstype";
 // Create a style function that applies the different styles based on a property value
 export const styleFunction = (feature: { get: (arg0: string) => string }) => {
@@ -14,7 +14,7 @@ export const styleFunction = (feature: { get: (arg0: string) => string }) => {
     return styleUnique;
   } 
   else if(!feature.get("typeStyle")){
-    console.log(25);
+    // console.log(25);
     
     
   }
@@ -23,7 +23,7 @@ export const styleFunction = (feature: { get: (arg0: string) => string }) => {
   else {
     console.log(feature.get("typeStyle"));
     
-    console.log(1111111);
+    // console.log(1111111);
 
     return styleRegular;
   }
@@ -92,4 +92,5 @@ export const styleButton: CSS.Properties = {
   display: "flex",
   flexDirection: "column-reverse",
   fontSize: "16px",
+  minWidth:'115px',
 };

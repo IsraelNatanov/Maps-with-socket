@@ -44,9 +44,6 @@ import Autocomplete from '@mui/material/Autocomplete';
 const SearchGeomtry: React.FC<MapProps> = ({ map, options }) => {
     
    
-    let i = 0;
-    
-
     useEffect(()=>{
     
         console.log(options);

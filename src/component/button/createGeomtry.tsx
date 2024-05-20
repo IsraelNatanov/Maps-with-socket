@@ -26,10 +26,10 @@ import CloseIcon from "@mui/icons-material/Close";
 import { styleButton } from "../../style/styleFunction";
 import { fromLonLat, transform } from "ol/proj";
 import GeoJSON from "ol/format/GeoJSON";
-import { GeometryType, GeometryTypePolygon } from "../../../typs/featuresType";
+import { GeometryType, GeometryTypePolygon } from "../../typs/featuresType";
 import { Coordinate, CoordinateFormat } from "ol/coordinate";
-import SnackbarPolygon from "../util/snackbarPolygon";
-import MessageCartoon from "../util/messageCartoon";
+import SnackbarPolygon from "../ui/snackbarPolygon";
+import MessageCartoon from "../ui/messageCartoon";
 import Grid from '@mui/material/Grid';
 // import "../maps.css"
 
@@ -54,7 +54,7 @@ interface PolygonData {
   overlay: Overlay;
 }
 
-const CreatePolygon: React.FC<MapComponentProps> = ({ map, setMap,setIsAddPolygon }) => {
+const CreateGeomtry: React.FC<MapComponentProps> = ({ map, setMap,setIsAddPolygon }) => {
   const drawInteractionRef = useRef<Draw | null>(null);
   const modifyInteractionRef = useRef<Modify | null>(null);
   const snapInteractionRef = useRef<Snap | null>(null);
@@ -372,4 +372,4 @@ const CreatePolygon: React.FC<MapComponentProps> = ({ map, setMap,setIsAddPolygo
   );
 };
 
-export default CreatePolygon;
+export default CreateGeomtry;
