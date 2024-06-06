@@ -7,9 +7,6 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import rtlPlugin from "stylis-plugin-rtl";
 import { prefixer } from "stylis";
 import Button from "@mui/material/Button";
-import { useAppSelector } from "../../../store/hooks";
-import { Features } from "../../../typs/featuresType";
-import { styleButton, styleFunction } from "../../../style/styleFunction";
 import Vector from "ol/layer/Vector";
 import Vectors from "ol/source/Vector";
 import GeoJSON from "ol/format/GeoJSON";
@@ -18,6 +15,8 @@ import { Geometry } from "ol/geom";
 import eventIconNot from "../../../images/eventIconNot.png";
 import eventIcon from "../../../images/eventIcon.png";
 import { CacheProvider } from "@emotion/react";
+import { useAppSelector } from "../../store/hooks";
+import { styleButton, styleFunction } from "../../style/styleFunction";
 
 
 interface Iprops {

@@ -4,4 +4,6 @@ export interface ButtonsDataType{
     icon: JSX.Element,
     onClick: () => void
   }
+
+  export type DrawInteractionType = 'Polygon' | 'Point' | 'None';
   

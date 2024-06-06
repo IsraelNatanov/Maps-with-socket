@@ -1,7 +1,5 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef, MutableRefObject } from "react";
 import { Feature, Map as OlMap } from "ol";
-import Vector from "ol/layer/Vector";
-import Vectors from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import GeoJSON from "ol/format/GeoJSON";
@@ -16,9 +14,7 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import LocationOffIcon from "@mui/icons-material/LocationOff";
 import ExploreOffIcon from "@mui/icons-material/ExploreOff";
 import ExploreIcon from "@mui/icons-material/Explore";
-import { FeatureObject, Features, SelectedPolygonType } from "../typs/featuresType";
-import ButtonSelectEvent from "./button/buttonSelectEvent";
-import CreateGeomtry from "./button/createGeomtry";
+import { FeatureObject, Features, SelectedPolygonType, selectFearure } from "../typs/featuresType";
 import polygonIcon from "../images/polygonIcon.png";
 import polygonNotIcon from "../images/polygonNotIcon.png";
 import SearchGeomtry from "./button/searchGeometry";
@@ -32,9 +28,10 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import NotificationsOff from "@mui/icons-material/NotificationsOff";
 import RenderButtons from "./button/renderButtons";
 import { ButtonsDataType } from "../typs/buttonsDataType";
-import { IFeatures } from "../../../types/FeatureType";
-import { useGetFeaturesData } from "../hooks/useFeaturesData";
+import { IFeatureCollection, useAddFeature, useDeleteFeature, useGetFeaturesData } from "../hooks/useFeaturesData";
 import { useMapSelect } from "../hooks/useMapSelect";
+import FormSelect from "./ui/formSelect";
+import { Properties, isVectorLayers } from "../utils/createOlGeometry";
 
 const format = new GeoJSON({ featureProjection: "EPSG:3857" });
 
@@ -46,23 +43,13 @@ interface Options {
 type DisplayFeaturesState = {
   [key: string]: boolean;
 };
+export type VectorLayersRef = MutableRefObject<{ [key: string]: VectorLayer<VectorSource<Geometry>> } | {}>;
+
 function MapContainer() {
+  const prevVectorLayersRef = useRef<{ [key: string]: VectorLayer<VectorSource<Geometry>> | null }>({});
   const [map, setMap] = useState<OlMap | null>(null);
-  const [isPoint, setIsPoint] = useState<boolean>(false);
-  const [isPolygon, setIsPolygon] = useState<boolean>(false);
-  const [isAlerts, setIsAlerts] = useState<boolean>(false);
-  const [eventesFeatures, setEventesFeatures] = useState<Features[]>([]);
-  const [isGeomtry, setIsGeomtry] = useState<boolean>(false);
-  const [isAddPolygon, setIsAddPolygon] = useState<boolean>(false);
-  const [optionsLayers, setOptionsLayers] = useState<Options[]>([]);
-  const [optionsPolygon, setOptionsPolygon] = useState<Options[]>([]);
-  const [optionsPoint, setOptionsPoint] = useState<Options[]>([]);
   const [isDeletePolygon, setIsDeletePolygon] = useState<boolean>(false);
-  const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
-  const [copyPolygonSource, setCopyPolygonSource] = useState<Vectors<Geometry> | null>(null);
-  const [openLoading, setOpenLoading] = useState<boolean>(false);
-  const [options, setOptions] = useState<Options[]>([]);
-  const [indexOptions, setIndexOptions] = useState<number>(0);
+  const [selectedFeature, setSelectedFeature] = useState<selectFearure | null>(null);
   const [isDisplayFeatures, setIsDisplayFeatures] = useState<DisplayFeaturesState>({
     'pointsLayer': false,
     'polygonsLayer': false,
@@ -70,7 +57,7 @@ function MapContainer() {
     'createGeomtry': false,
 
   })
-  const onSuccess = (data: IFeatures | undefined) => {
+  const onSuccess = (data: IFeatureCollection | undefined) => {
     console.log({ data })
   }
 
@@ -79,123 +66,41 @@ function MapContainer() {
     return <h2>{(error as Error)?.message}</h2>
   }
 
+
   // Usage for points
   const { isLoading: isLoadingPoints, data: pointsData, isError: isErrorPoints, error: errorPoints, isPreviousData: isPreviousDataPoints } = useGetFeaturesData(
-    'points',
+    'pointsLayer',
     onSuccess,
     onError
   );
 
   // Usage for polygons
   const { isLoading: isLoadingPolygons, data: polygonsData, isError: isErrorPolygons, error: errorPolygons, isPreviousData: isPreviousDataPolygons } = useGetFeaturesData(
-    'polygons',
+    'polygonsLayer',
     onSuccess,
     onError
   );
-  // const points = pointsData?.data ?? [];
-  // const polygons = polygonsData?.data ?? [];
 
-
-  // if (isLoadingPoints || isLoadingPolygons) {
-  //   return <SimpleBackdrop openLoading={openLoading} />
-  // }
-  // const new VectorSource({
-  //     format: new GeoJSON(),
-  //   });
-  // };
-
-  // const createVectorLayer = (source: IFeatures, styleFunction: any, nameLayer: string) => {
-  //   let vectorSource: VectorSource | null = null;
-
-  //   if (source && source.type === 'FeatureCollection' && Array.isArray(source.features)) {
-  //     // Create a new VectorSource instance
-  //     vectorSource = new VectorSource({
-  //       features: format.readFeatures(source),
-  //     });
-  //   } else {
-  //     console.error('Invalid source object passed to createVectorLayer:', source);
-  //   }
-
-  //   if (vectorSource) {
-  //     return new VectorLayer({
-  //       source: vectorSource,
-  //       style: styleFunction,
-  //       properties: {
-  //         nameLayer: nameLayer,
-  //       },
-  //     });
-  //   } else {
-  //     return null;
-  //   }
-  // };
-  // const listVectores = useMemo(() => [
-  //   {
-  //     key: '0',
-  //     layerName: 'pointsLayer',
-  //     data: pointsData
-  //   },
-  //   {
-  //     key: '1',
-  //     layerName: 'polygonsLayer',
-  //     data: polygonsData
-  //   },
-  // ], [pointsData, polygonsData])
-
-  // const vectorLayers = useMemo(() => {
-  //   return listVectores
-  //     .filter(obj => obj.data !== undefined)
-  //     .map(obj => {
-  //       const layer = createVectorLayer(obj.data!, styleFunction, obj.layerName);
-  //       if (layer) {
-  //         return layer;
-  //       } else {
-  //         // Handle case where createVectorLayer returns null
-  //         // You can return a default layer or handle the null case as needed
-  //         return new VectorLayer({
-  //           source: undefined
-  //         });
-  //       }
-  //     })
-  //     .reduce<{ [key: string]: VectorLayer<VectorSource<Geometry>> }>((acc, layer) => {
-  //       if (layer) {
-  //         acc[layer.get('nameLayer')] = layer;
-  //       }
-  //       return acc;
-  //     }, {});
-  // }, [listVectores, styleFunction]);
-
-  // useEffect(() => {
-  //   Object.values(vectorLayers).forEach((layer) => {
-  //     map?.addLayer(layer)
-  //     layer.setVisible(false)
-  //   })
-
-  //   console.log('vectorLayer', vectorLayers);
-  // }, [vectorLayers]);
-  const createVectorLayer = (source: IFeatures, styleFunction: any, nameLayer: string) => {
+  const createVectorLayer = (source: IFeatureCollection, styleFunction: any, nameLayer: string) => {
     let vectorSource: VectorSource | null = null;
   
-    if (source && source.type === 'FeatureCollection' && Array.isArray(source.features)) {
-      // Create a new VectorSource instance
-      vectorSource = new VectorSource({
-        features: format.readFeatures(source),
-      });
+    // Create a new VectorSource instance
+    vectorSource = new VectorSource({
+      features: format.readFeatures(source),
+    });
   
-      // Set properties for each feature
-      vectorSource.getFeatures().forEach((feature, indexLayer) => {
-        const properties = feature.getProperties();
-        const id = properties.id || feature.getId();
-        feature.setProperties({
-          ...properties,
-          indexLayer: indexLayer,
-       indexFeature: id,
+    // Set properties for each feature
+    vectorSource.getFeatures().forEach((feature, indexLayer) => {
+      const properties = feature.getProperties();
+      const id = properties.id || feature.getId();
+      feature.setProperties({
+        ...properties,
+        indexLayer: indexLayer,
+        indexFeature: id,
         nameLayer: nameLayer,
-        nameFeature:properties.name
-        });
+        nameFeature: properties.name
       });
-    } else {
-      console.error('Invalid source object passed to createVectorLayer:', source);
-    }
+    });
   
     if (vectorSource) {
       return new VectorLayer({
@@ -209,25 +114,25 @@ function MapContainer() {
       return null;
     }
   };
-  
+
   const listVectores = useMemo(() => [
     {
       key: '0',
-      layerName: 'pointsLayer',
+      nameLayer: 'pointsLayer',
       data: pointsData
     },
     {
       key: '1',
-      layerName: 'polygonsLayer',
+      nameLayer: 'polygonsLayer',
       data: polygonsData
     },
-  ], [pointsData, polygonsData])
-  
+  ], [pointsData, polygonsData]);
+
   const vectorLayers = useMemo(() => {
     return listVectores
       .filter(obj => obj.data !== undefined)
       .map(obj => {
-        const layer = createVectorLayer(obj.data!, styleFunction, obj.layerName);
+        const layer = createVectorLayer(obj.data!, styleFunction, obj.nameLayer);
         if (layer) {
           return layer;
         } else {
@@ -245,29 +150,43 @@ function MapContainer() {
         return acc;
       }, {});
   }, [listVectores, styleFunction]);
+  const { mutate: deleteFeatureMutate } = useDeleteFeature(vectorLayers);
   
+
   useEffect(() => {
-    Object.values(vectorLayers).forEach((layer) => {
-      map?.addLayer(layer);
-      layer.setVisible(false);
-    });
+   const indexLayer1 = map?.getLayers().getArray()[1]
+console.log('indexLayer1', indexLayer1);
+console.log('vectorLayers', vectorLayers);
+
+if (isVectorLayers(vectorLayers) && (indexLayer1 === undefined)) {
+  console.log(1111);
   
-    console.log('vectorLayer', vectorLayers);
+  Object.values(vectorLayers).forEach((layer) => {
+    map?.addLayer(layer);
+    layer.setVisible(false);
+  });
+}
+console.log(map?.getLayers());
+
+// const layers = map?.getLayers().getArray().forEach((layer)=>{
+//   const properties = layer.get
+//  console.log( properties.name)
+      // });
   }, [vectorLayers]);
-  
 
 
+  const { mutate: addFeatureMutate } = useAddFeature(vectorLayers);
   const getAllFeatureNames = useMemo(() => {
     const allFeatureNames: Options[] = [];
     let index = 0;
     Object.entries(vectorLayers).forEach(([layerKey, layer]) => {
       if (isDisplayFeatures[layerKey]) {
-      layer.getSource()?.forEachFeature((feature) => {
-        console.log(isDisplayFeatures[layerKey]);
-        const name = feature.getProperties().name;
-        allFeatureNames.push({ label: name, id: ++index });
-      });
-    }
+        layer.getSource()?.forEachFeature((feature) => {
+          console.log(isDisplayFeatures[layerKey]);
+          const name = feature.getProperties().name;
+          allFeatureNames.push({ label: name, id: ++index });
+        });
+      }
     });
     return allFeatureNames;
   }, [vectorLayers, isDisplayFeatures]); // Include vectorLayers as a dependency
@@ -275,7 +194,7 @@ function MapContainer() {
   console.log('All Feature Names:', getAllFeatureNames);
 
 
- 
+
   const handleDisplayLayers = (nameLayer: string) => {
     const isVisible = vectorLayers[nameLayer].getVisible()
     vectorLayers[nameLayer].setVisible(!isVisible)
@@ -293,334 +212,64 @@ function MapContainer() {
     }));
   };
 
-  const handleSelectPolygons = (event:any) => {
-    const selectedFeatures = event.selected;
+  const handleSelectFeatures = (event: SelectEvent) => {
+    console.log('event', event);
 
-    if (selectedFeatures.length > 0) {
-      const selectedPolygon = selectedFeatures[0].getProperties() 
-      console.log('selectedPolygon',selectedPolygon);
-      setSelectedFeature(selectedPolygon);
-      // setCopyPolygonSource(polygonSource);
+    const selected = event.selected;
+    // console.log('selectedFeatures', selected[0].getId());
+    const selectedFeatures = event.target.getFeatures();
+    // console.log('selectedFeatures', selectedFeatures);
 
+    if (selected.length > 0 && selected[0].getId() !== undefined) {
+      const selectedProperties = selected[0].getProperties()
+      console.log('selectedProperties', selectedProperties);
+      const selectedFeatures: selectFearure = {
+        indexFeature: selectedProperties.indexFeature,
+        indexLayer: selectedProperties.indexLayer,
+        name: selectedProperties.name,
+        nameFeature: selectedProperties.selectedProperties,
+        nameLayer: selectedProperties.nameLayer,
+        typeStyle: selectedProperties.nameLayer
+
+      }
+      setSelectedFeature(selectedFeatures);
       setIsDeletePolygon(true);
-      
-
-      // console.log(121, categoriesByName[`layer-${selectedPolygon.layerIndex}`]);
-
-      // const selectionId = host
-      //   .createSelectionIdBuilder()
-      //   // This is sorting by the LABEL of the layer.
-      //   .withCategory(
-      //     categoriesByName[`layer-${selectedPolygon.layerIndex}-Unique-ID`],
-      //     selectedPolygon.polygonIndex
-      //   )
-      //   .createSelectionId();
-
-      // selectionManager.select(selectionId);
     }
-    else{
-      setSelectedFeature(null); // Set selectedFeature to null when no polygon is selected
+    else {
+      setSelectedFeature(null); 
       setIsDeletePolygon(false);
     }
   };
 
-  const selectInteractions = useMapSelect(handleSelectPolygons);
+  const deleteFeature = () => {
+    if (selectedFeature) {
+      deleteFeatureMutate({ layer: selectedFeature.nameLayer, idFeature: selectedFeature.indexFeature })
+      setSelectedFeature(null);
+      setIsDeletePolygon(false);
+    }
+
+  }
+
+  const selectInteractions = useMapSelect(handleSelectFeatures);
   useEffect(() => {
     // if(map) map.removeInteraction(selectInteraction)
     if (map) map.addInteraction(selectInteractions);
   }, [map]);
 
-  // useEffect(() => {
-  //   if (!isLoadingPolygons && !isErrorPolygons && polygonsData) {
-  //     setOpenLoading(true);
+ 
+  // const getApiEvents = async () => {
+  //   try {
+  //     const res = await axios.get("http://localhost:5000/eventesFeatures");
+  //     setEventesFeatures(res.data);
+  //     console.log(res.data);
 
-  //     const socket = io("http://localhost:5000");
-
-  //     socket.on("deletePolygon", (deletedPolygonId) => {
-  //       const feature = polygonSource.getFeatureById(deletedPolygonId);
-  //       if (feature) {
-  //         polygonSource.removeFeature(feature);
-  //       }
-  //     });
-
-  //     socket.on("newPolygon", (newPolygon) => {
-  //       const feature = format.readFeature(newPolygon);
-  //       polygonSource.addFeature(feature);
-  //     });
-
-  //     const features = format.readFeatures(polygonsData);
-  //     polygonSource.addFeatures(features);
-  //     map!.addInteraction(selectInteraction);
-  //     setOpenLoading(false);
-
-  //     const arr = getAllNameOfProperties(polygonsData.features);
-  //     setOptionsPolygon(arr);
-  //     setOptions((option) => [...option, ...arr]);
-  //     return () => {
-  //       socket.disconnect();
-  //     };
+  //   } catch (error) {
+  //     throw error;
   //   }
 
-  // }, [isLoadingPolygons ,isErrorPolygons, polygonsData]);
+  // };
 
 
-
-
-  // if (isErrorPoints ||isErrorPolygons) {
-  //   return <h2>{(error as Error)?.message}</h2>
-  // }
-
-
-  // useEffect(() => {
-  //   getApiEvents();
-
-
-  // }, []);
-  const getApiEvents = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/eventesFeatures");
-      setEventesFeatures(res.data);
-      console.log(res.data);
-
-    } catch (error) {
-      throw error;
-    }
-
-  };
-
-  const vectorLoaderPolygon = async () => {
-    setOpenLoading(true);
-
-    // Establish a socket connection
-    const socket = io("http://localhost:5000")
-    //     , { extraHeaders:{
-    // ['Authorzation']: 'Brear '+ "jdjskd"
-    //     }});
-
-    socket.on("deletePolygon", (deletedPolygonId) => {
-      // Remove the polygon from the map
-      const feature = polygonSource.getFeatureById(deletedPolygonId);
-      if (feature) {
-        polygonSource.removeFeature(feature);
-      }
-    });
-
-
-
-    // Listen for the "newPolygon" event
-    socket.on("newPolygon", (newPolygon) => {
-      console.log(
-        newPolygon
-      );
-
-      // Add the new polygon to the map
-      const feature = format.readFeature(newPolygon);
-      polygonSource.addFeature(feature);
-    });
-
-    axios
-      .get("http://localhost:5000/polygonsFeatures")
-      .then((res) => {
-        console.log(25142, res.data);
-        const features = format.readFeatures(res.data);
-        polygonSource.addFeatures(features);
-        map!.addInteraction(selectInteraction);
-        setOpenLoading(false);
-
-        console.log(isDeletePolygon);
-        const arr = getAllNameOfProperties(res.data.features);
-        setOptionsPolygon(arr);
-        setOptions((option) => [...option, ...arr]);
-
-        // setOptions(arr);
-      })
-      .catch((error) => console.log(error));
-    console.log(options);
-
-    // Clean up the socket connection when done
-    return () => {
-      socket.disconnect();
-    };
-  };
-
-  
-
-  const handleSelectPolygon = (event: any) => {
-    const selectedFeatures = event.target.getFeatures();
-    console.log(polygonSource);
-    if (selectedFeatures.getLength() > 0) {
-      setSelectedFeature(selectedFeatures.item(0));
-      setCopyPolygonSource(polygonSource);
-
-      setIsDeletePolygon(true);
-
-      console.log("true");
-    } else {
-      setSelectedFeature(null); // Set selectedFeature to null when no polygon is selected
-      setIsDeletePolygon(false);
-      console.log(555);
-      console.log("false");
-    }
-  };
-
-  let polygonSource = new Vectors({
-    format: new GeoJSON(),
-    // url:"http://localhost:9000/geojson"
-    loader: vectorLoaderPolygon!,
-  });
-
-  let vectorLayerPolygon = new Vector({
-    source: polygonSource,
-    style: styleFunction,
-  });
-
-  const selectInteraction = new Select({
-    condition: click,
-    // layers: [vectorLayers], // Only select features from the vector layer
-  });
-  selectInteraction.on("select", handleSelectPolygon);
-
-  const deletePolygon = async () => {
-    console.log(copyPolygonSource);
-    try {
-      let resp = await axios({
-        url: `http://localhost:5000/polygonsFeatures/${selectedFeature?.getId()}`,
-        method: "delete",
-        headers: {
-          "content-type": "application/json",
-        },
-      });
-
-      console.log(selectedFeature);
-
-      // Remove the feature from the vector source
-      copyPolygonSource!.removeFeature(selectedFeature!);
-      map!.updateSize();
-      setSelectedFeature(null);
-      setIsDeletePolygon(false);
-
-      return resp;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const handleAddLayerPolygon = () => {
-    if (map) {
-      const layers = map.getLayers().getArray();
-      const targetLayer = layers.find(
-        (layer) => layer.get("id") === "your-layer-id-2"
-      );
-      if (targetLayer) {
-        // Layer exists, remove it
-        map.removeLayer(targetLayer);
-        {
-          optionsPolygon.map((options) => deleteArray(options.id));
-        }
-        setOptionsPolygon([]);
-
-        setIsPolygon(false);
-      } else {
-        // Layer doesn't exist, add it
-        setIsPolygon(true);
-        vectorLayerPolygon.set("id", "your-layer-id-2");
-        map.addLayer(vectorLayerPolygon);
-      }
-    }
-  };
-
-  const vectorLoaderPoint = async () => {
-    setOpenLoading(true);
-    axios
-      .get("http://localhost:5000/pointsFeatres")
-      .then((res) => {
-        console.log(25142, res.data);
-        const features = format.readFeatures(res.data);
-        pointSource.addFeatures(features);
-        const arr = getAllNameOfProperties(res.data.features);
-        setOptionsPoint(arr);
-        setOptions((option) => [...option, ...arr]);
-
-        console.log(polygonSource);
-
-        setOptionsLayers([]);
-        setOpenLoading(false);
-      })
-      .catch((error) => console.log(error));
-  };
-
-  let pointSource = new Vectors({
-    format: new GeoJSON(),
-    // url:"http://localhost:9000/geojson"
-    loader: vectorLoaderPoint!,
-  });
-
-  let vectorLayerPoint = new Vector({
-    source: pointSource,
-    style: styleFunction,
-  });
-
-  const handleAddLayerPoint = () => {
-
-    if (map) {
-      const layers = map.getLayers().getArray();
-      const targetLayer = layers.find(
-        (layer) => layer.get("id") === "your-layer-id-1"
-      );
-
-      if (targetLayer) {
-        // Layer exists, remove it
-        map.removeLayer(targetLayer);
-
-        {
-          optionsPoint.map((options) => deleteArray(options.id));
-        }
-        setOptionsPoint([]);
-        setIsPoint(false);
-      } else {
-        // Layer doesn't exist, add it
-
-        vectorLayerPoint.set("id", "your-layer-id-1");
-        map.addLayer(vectorLayerPoint);
-
-        setIsPoint(true);
-      }
-    }
-  };
-
-  const displayGeomtry = () => {
-    setIsGeomtry(!isGeomtry);
-  };
-  const displayAlerts = () => {
-    setIsAlerts(!isAlerts);
-  };
-
-  const getAllNameOfProperties = (data: FeatureObject[]) => {
-    const arr: Options[] = [];
-
-    if (Array.isArray(data)) {
-      data.forEach((item: FeatureObject) => {
-        const nameOfData: Options = {
-          label: item.properties.name,
-          id: indexOptions,
-        };
-        setIndexOptions(indexOptions + 1);
-        arr.push(nameOfData);
-        console.log(item.properties.name); // Print each item inside the function
-      });
-    } else {
-      console.error("Data is not an array:", data);
-    }
-    return arr;
-  };
-  const deleteArray = (arrayId: number) => {
-    // Remove the identified array from the state
-    console.log(arrayId);
-
-    setOptions((prevOptions) =>
-      prevOptions.filter((option) => option.id !== arrayId)
-    );
-  };
   const buttonsData: ButtonsDataType[] = [
     {
       id: '0',
@@ -651,7 +300,7 @@ function MapContainer() {
 
   return (
     <div style={{ position: 'relative' }}>
-      {openLoading && <SimpleBackdrop openLoading={openLoading} />}
+  <SimpleBackdrop openLoading={isLoadingPolygons || isLoadingPoints} />
       <Stack
         direction="row"
         justifyContent="space-between"
@@ -661,18 +310,18 @@ function MapContainer() {
       >
         <Stack direction="row">
           <RenderButtons buttonsData={buttonsData} />
-          {isDisplayFeatures['eventsLayer'] && <DeviderEvent map={map} setIsPoint={setIsPoint} isPoint={isPoint} handleAddLayerPoint={handleAddLayerPoint} />}
+          {/* {isDisplayFeatures['eventsLayer'] && <DeviderEvent map={map} setIsPoint={setIsPoint} isPoint={isPoint} handleAddLayerPoint={handleAddLayerPoint} />} */}
           {isDisplayFeatures['createGeomtry'] && (
-            <CreateGeomtry
+            <FormSelect
               setMap={setMap}
               map={map}
-              setIsAddPolygon={setIsAddPolygon}
+              addFeatureMutate={addFeatureMutate}
             />
           )}
           {/* {isGeomtry && <SelectGeomtry setMap={setMap} map={map} /> } */}
 
           {isDeletePolygon && (
-            <Button style={styleButton} variant="text" onClick={deletePolygon}>
+            <Button style={styleButton} variant="text" onClick={deleteFeature}>
               מחק פוליגון
               <DeleteIcon />
             </Button>
@@ -680,7 +329,7 @@ function MapContainer() {
 
         </Stack>
 
-        {(isDisplayFeatures['pointsLayer'] || isDisplayFeatures['polygonsLayer'] ) && (
+        {(isDisplayFeatures['pointsLayer'] || isDisplayFeatures['polygonsLayer']) && (
           <SearchGeomtry setMap={setMap} map={map} options={getAllFeatureNames} />
         )}
 

@@ -10,15 +10,14 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 type OpenProps = {
-  setOpenAlert: React.Dispatch<React.SetStateAction<boolean>>;
-  openAlert: boolean;
+  openAlertSnackbar: boolean;
 };
 
-export default function SnackbarPolygon({ setOpenAlert, openAlert }: OpenProps) {
+export default function SnackbarMessage({  openAlertSnackbar }: OpenProps) {
 
 
   return (
-    <Snackbar open={openAlert} >
+    <Snackbar open={openAlertSnackbar} >
         <Alert  severity="success" sx={{ width: '100%' }}>
        ! נוסף בהצלחה
         </Alert>
